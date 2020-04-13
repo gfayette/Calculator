@@ -1,7 +1,6 @@
 import java.util.Scanner
 import kotlin.math.pow
 
-
 class Calculator() {
     private val intPattern = Regex("^[-]?[0-9]+$")
     private val floatPattern = Regex("^[-]?[0-9]+[.][0-9]*$")
@@ -12,13 +11,18 @@ class Calculator() {
     private val expPattern = Regex("^\\^$")
     private val reader = Scanner(System.`in`)
     private var running = true
+    private var clear = false
 
     private fun parseInput(input: String): Int {
-        if (intPattern.containsMatchIn(input)) {
+        if (input.toUpperCase().equals("QUIT")) {
+            running = false
             return 0
+        } else if (input.toUpperCase().equals("CLEAR")) {
+            clear = true
+            return 0
+        } else if (intPattern.containsMatchIn(input)) {
+            return 1
         } else if (floatPattern.containsMatchIn(input)) {
-            return 0
-        } else if (input.toUpperCase().equals("QUIT")) {
             return 1
         } else if (addPattern.containsMatchIn(input)) {
             return 2
@@ -31,7 +35,7 @@ class Calculator() {
         } else if (expPattern.containsMatchIn(input)) {
             return 6
         } else {
-            return 7
+            return 8
         }
     }
 
@@ -40,74 +44,87 @@ class Calculator() {
             print("Enter a number:\n")
             val userInput = reader.next()
             val inputCode = parseInput(userInput)
-            if (inputCode == 0) {
+            if (inputCode == 1) {
                 return userInput.toDouble()
-            } else if (inputCode == 1) {
-                running = false
-                return -1.0
+            } else if (inputCode == 0) {
+                return inputCode.toDouble()
             } else {
                 print("try again\n")
             }
         }
     }
 
-    private fun getOperator(): Int {
+    private fun getOperator(): Char {
         while (true) {
             print("Enter an operator:\n")
-            val userInput = reader.next()
-            val inputCode = parseInput(userInput)
+            val operator = reader.next()
+            val inputCode = parseInput(operator)
             if (inputCode in 2..6) {
-                return inputCode
-            } else if (inputCode == 1) {
-                running = false
-                return -1
+                return operator[0]
+            } else if (inputCode == 0) {
+                return 'x'
             } else {
                 print("try again\n")
             }
         }
     }
 
-    private fun performOperation(current: Double, operator: Int, number: Double): Double {
+    private fun performOperation(current: Double, operator: Char, number: Double): Double {
         when (operator) {
-            2 -> return current + number
-            3 -> return current - number
-            4 -> return current * number
-            5 -> return current / number
-            6 -> return current.pow(number)
+            '+' -> return current + number
+            '-' -> return current - number
+            '*' -> return current * number
+            '/' -> return current / number
+            '^' -> return current.pow(number)
             else -> {
-                println("Error! operator is not correct")
-                return -1.0
+                println("Operator error")
+                this.running = false
+                return 0.0
             }
         }
     }
 
-    fun run() {
+    fun reset() {
+        clear = false
+    }
+
+    fun run(): Int {
         var current: Double
-        var operator: Int
+        var operator: Char
         var number: Double
 
         current = getNumber()
-        while (running) {
+        if (!running) return 0
+        if (clear) return 1
+        while (true) {
+            println(current)
             operator = getOperator()
-            if (!running) break
+            if (!running) return 0
+            if (clear) return 1
 
             number = getNumber()
-            if (!running) break
+            if (!running) return 0
+            if (clear) return 1
 
-            while(number == 0.0 && operator == 5){
+            while (number == 0.0 && operator == '/') {
                 println("Can't divide by zero. Try again")
                 number = getNumber()
-                if (!running) break
+                if (!running) return 0
+                if (clear) return 1
             }
-
+            val oldCurrent = current
             current = performOperation(current, operator, number)
-            println(current)
+            println("$oldCurrent $operator $number = $current")
         }
-        println("Goodbye")
     }
 }
 
 fun main(args: Array<String>) {
     val c = Calculator()
-    c.run()
+    var returnCode = c.run()
+    while (returnCode != 0) {
+        c.reset()
+        returnCode = c.run()
+    }
+    println("Goodbye!")
 }
