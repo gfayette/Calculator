@@ -14,10 +14,11 @@ class Calculator() {
     private var clear = false
 
     private fun parseInput(input: String): Int {
-        if (input.toUpperCase().equals("QUIT")) {
+        if (input.toUpperCase().equals("Q")) {
             running = false
             return 0
-        } else if (input.toUpperCase().equals("CLEAR")) {
+        } else if (input.toUpperCase().equals("C")) {
+            running = false
             clear = true
             return 0
         } else if (intPattern.containsMatchIn(input)) {
@@ -47,7 +48,7 @@ class Calculator() {
             if (inputCode == 1) {
                 return userInput.toDouble()
             } else if (inputCode == 0) {
-                return inputCode.toDouble()
+                return 0.0
             } else {
                 print("try again\n")
             }
@@ -59,10 +60,8 @@ class Calculator() {
             print("Enter an operator:\n")
             val operator = reader.next()
             val inputCode = parseInput(operator)
-            if (inputCode in 2..6) {
+            if (inputCode in 2..6 || inputCode == 0) {
                 return operator[0]
-            } else if (inputCode == 0) {
-                return 'x'
             } else {
                 print("try again\n")
             }
@@ -85,32 +84,29 @@ class Calculator() {
     }
 
     fun reset() {
+        running = true
         clear = false
     }
 
-    fun run(): Int {
+    fun run(): Boolean {
         var current: Double
         var operator: Char
         var number: Double
 
         current = getNumber()
-        if (!running) return 0
-        if (clear) return 1
+        if (!running) return clear
         while (true) {
             println(current)
             operator = getOperator()
-            if (!running) return 0
-            if (clear) return 1
+            if (!running) return clear
 
             number = getNumber()
-            if (!running) return 0
-            if (clear) return 1
+            if (!running) return clear
 
             while (number == 0.0 && operator == '/') {
                 println("Can't divide by zero. Try again")
                 number = getNumber()
-                if (!running) return 0
-                if (clear) return 1
+                if (!running) return clear
             }
             val oldCurrent = current
             current = performOperation(current, operator, number)
@@ -120,12 +116,10 @@ class Calculator() {
 }
 
 fun main(args: Array<String>) {
+    println("Welcome! Type 'C' to clear, 'Q' to quit")
     val c = Calculator()
-    var returnCode: Int
-    returnCode = c.run()
-    while (returnCode != 0) {
+    while (c.run()) {
         c.reset()
-        returnCode = c.run()
     }
     println("Goodbye!")
 }
