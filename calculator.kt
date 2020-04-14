@@ -121,7 +121,8 @@ class Calculator() {
 
 fun main(args: Array<String>) {
     val c = Calculator()
-    var returnCode = c.run()
+    var returnCode: Int
+    returnCode = c.run()
     while (returnCode != 0) {
         c.reset()
         returnCode = c.run()
