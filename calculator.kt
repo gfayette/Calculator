@@ -4,11 +4,7 @@ import kotlin.math.pow
 class Calculator() {
     private val intPattern = Regex("^[-]?[0-9]+$")
     private val floatPattern = Regex("^[-]?[0-9]+[.][0-9]*$")
-    private val addPattern = Regex("^\\+$")
-    private val subPattern = Regex("^-$")
-    private val mulPattern = Regex("^\\*$")
-    private val divPattern = Regex("^/$")
-    private val expPattern = Regex("^\\^$")
+    private val opPattern = Regex("^[%\\*\\+-/\\^]$")
     private val reader = Scanner(System.`in`)
     private var running = true
     private var clear = false
@@ -21,22 +17,14 @@ class Calculator() {
             running = false
             clear = true
             return 0
+        } else if (opPattern.containsMatchIn(input)) {
+            return 1
         } else if (intPattern.containsMatchIn(input)) {
-            return 1
-        } else if (floatPattern.containsMatchIn(input)) {
-            return 1
-        } else if (addPattern.containsMatchIn(input)) {
             return 2
-        } else if (subPattern.containsMatchIn(input)) {
-            return 3
-        } else if (mulPattern.containsMatchIn(input)) {
-            return 4
-        } else if (divPattern.containsMatchIn(input)) {
-            return 5
-        } else if (expPattern.containsMatchIn(input)) {
-            return 6
+        } else if (floatPattern.containsMatchIn(input)) {
+            return 2
         } else {
-            return 8
+            return -1
         }
     }
 
@@ -45,7 +33,7 @@ class Calculator() {
             print("Enter a number:\n")
             val userInput = reader.next()
             val inputCode = parseInput(userInput)
-            if (inputCode == 1) {
+            if (inputCode == 2) {
                 return userInput.toDouble()
             } else if (inputCode == 0) {
                 return 0.0
@@ -60,7 +48,7 @@ class Calculator() {
             print("Enter an operator:\n")
             val operator = reader.next()
             val inputCode = parseInput(operator)
-            if (inputCode in 2..6 || inputCode == 0) {
+            if (inputCode in 0..1) {
                 return operator[0]
             } else {
                 print("try again\n")
@@ -75,6 +63,7 @@ class Calculator() {
             '*' -> return current * number
             '/' -> return current / number
             '^' -> return current.pow(number)
+            '%' -> return current % number
             else -> {
                 println("Operator error")
                 this.running = false
